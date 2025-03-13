@@ -1,3 +1,4 @@
+import { get } from "node:http";
 import { sqliteConnection } from "../databases";
 import { UserDataTypes } from "../validations/userSchema";
 
@@ -14,6 +15,19 @@ export const userRepository = {
       return { id, name, email, password };
     } catch (error) {
       throw error;
+    }
+  },
+
+  async getUserByEmail(email: string) {
+    try {
+      const db = await sqliteConnection();
+      const query = `SELECT * FROM users WHERE email = ?`;
+
+      const user = await db.get(query, email);
+
+      return user;
+    } catch (error) {
+      // throw error;
     }
   },
 };
