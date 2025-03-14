@@ -27,7 +27,19 @@ export const userRepository = {
 
       return user;
     } catch (error) {
-      // throw error;
+      throw error;
+    }
+  },
+  async getUserByID(id: string) {
+    try {
+      const db = await sqliteConnection();
+      const query = `SELECT * FROM users WHERE id = ?`;
+
+      const user = await db.get(query, id);
+
+      return user;
+    } catch (error) {
+      throw error;
     }
   },
 };
