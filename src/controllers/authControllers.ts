@@ -19,7 +19,18 @@ export const authControllers = {
         maxAge: 1000 * 60 * 60 * 24, // 1d
       });
 
-      res.status(200).json({ message: "Login completed", id  });
+      res.status(200).json({ message: "Login completed", id });
+    } catch (error) {
+      next(error);
+    }
+  },
+
+  async logout(req: Request, res: Response, next: NextFunction) {
+    try {
+      res
+        .clearCookie("token")
+        .status(200)
+        .json({ message: "Logout completed" });
     } catch (error) {
       next(error);
     }
