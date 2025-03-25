@@ -1,4 +1,3 @@
-import { get } from "node:http";
 import { sqliteConnection } from "../databases";
 import { UserDataTypes } from "../validations/userSchema";
 
