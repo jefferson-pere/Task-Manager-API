@@ -1,11 +1,12 @@
 import { sqliteConnection } from "../databases";
-import { TaskDataTypes } from "../validations/taskSchema";
+import { AppError } from "../errors/appError";
+import { TaskDataCreate, UserTaskPagination } from "../services/taskServices";
 
-export type CreateTaskDataType = TaskDataTypes & { id: string };
-export type UpdateTaskDataType = CreateTaskDataType & { uptade_at: Date };
+export type CreateTaskDataType = TaskDataCreate & { id: string };
+export type UpdateTaskDataType = CreateTaskDataType & { update_at: Date };
 
 export const taskRepository = {
-  async create({
+  async createTask({
     id,
     title,
     description,
@@ -38,6 +39,40 @@ export const taskRepository = {
       throw error;
     }
   },
+  async getTasks({ userID, limit, offset, filter }: UserTaskPagination) {
+    try {
+      const db = await sqliteConnection();
+      let querySql = "";
+      let tasks = [];
+      switch (filter) {
+        case "all":
+          querySql = `SELECT * FROM tasks WHERE user_id = ? ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+          tasks = await db.all(querySql, [userID, limit, offset]);
+          break; //
+
+        case "completed":
+          querySql = `SELECT * FROM tasks WHERE user_id = ? AND status = 'completed' ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+          tasks = await db.all(querySql, [userID, limit, offset]);
+          break; //
+
+        case "pending":
+          querySql = `SELECT * FROM tasks WHERE user_id = ? AND status = 'peding' AND date >= CURRENT_DATE ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+          tasks = await db.all(querySql, [userID, limit, offset]);
+          break; //
+
+        case "late":
+          querySql = `SELECT * FROM tasks WHERE user_id = ? AND status = 'peding' AND date < CURRENT_DATE ORDER BY created_at DESC LIMIT ? OFFSET ?`;
+          tasks = await db.all(querySql, [userID, limit, offset]);
+          break; //
+
+        default:
+          throw new AppError("Invalid filter", 400);
+      }
+      return tasks;
+    } catch (error) {
+      throw error;
+    }
+  },
 
   async updateTask({
     id,
@@ -46,7 +81,7 @@ export const taskRepository = {
     date,
     status,
     user_id,
-    updated_at,
+    update_at,
   }: UpdateTaskDataType) {
     try {
       const db = await sqliteConnection();
@@ -60,12 +95,12 @@ export const taskRepository = {
         description,
         date,
         status,
-        updated_at,
+        update_at,
         id,
         user_id,
       ]);
 
-      return { id, title, description, date, status, user_id, updated_at };
+      return { id, title, description, date, status, user_id, update_at };
     } catch (error) {
       throw error;
     }
