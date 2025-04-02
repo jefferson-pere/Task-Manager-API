@@ -10,7 +10,6 @@ export const taskControllers = {
     try {
       const { title, description, date, status } = taskSchema.parse(req.body);
       const { id } = UUIDSchema().parse({ id: req.userID });
-
       const taskCreated = await taskServices.create(
         { title, description, date, status, user_id: id },
         taskRepository
@@ -22,12 +21,10 @@ export const taskControllers = {
       next(error);
     }
   },
-
   async read(req: Request, res: Response, next: NextFunction) {
     try {
       const { limit, offset, filter } = paginationSchema.parse(req.query);
       const { id } = UUIDSchema().parse({ id: req.userID });
-
       const userTasks = await taskServices.read(
         {
           userID: id,
@@ -37,13 +34,11 @@ export const taskControllers = {
         },
         taskRepository
       );
-
       res.status(200).json(userTasks);
     } catch (error) {
       next(error);
     }
   },
-
   async update(req: Request, res: Response, next: NextFunction) {
     try {
       const { title, description, date, status } = taskSchema.parse(req.body);
