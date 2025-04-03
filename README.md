@@ -20,7 +20,7 @@
 
 ```bash
 # clone project
-$ git clone https://github.com/EmanuelQuintino/Task-Manager-WDC-API.git
+$ git clone https://github.com/jefferson-pere/Task-Manager-API.git
 
 # install dependencies
 $ npm install
@@ -70,5 +70,5 @@ KEY_TOKEN=""
 
 ## Links
 
-- [Deploy](https://task-manager-wdc.vercel.app/)
+- [Deploy](https://task-manager-api-9om1.onrender.com)
 - [Front Repository](https://github.com/EmanuelQuintino/Task-Manager-WDC/)
