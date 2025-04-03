@@ -1,13 +1,15 @@
 import express from "express";
 import { routes } from "./routes";
-import { AppErrors } from "./errors/appErrors";
-import { sqliteConnection } from "./databases";
-import { runMigrations } from "./databases/migrations";
+import { sqliteConnection } from "./databases/sqlite3";
+import { runMigrations } from "./databases/sqlite3/migrations";
+import { appErrors } from "./errors/appErrors";
+import { pageNotFound } from "./errors/pageNotFound";
 import cookieParser from "cookie-parser";
 import cors from "cors";
+import "dotenv/config";
 
 const app = express();
-const PORT = process.env.PORT || 3333;
+const PORT = process.env.PORT || 3000;
 
 app.use(express.json());
 app.use(cookieParser());
@@ -15,36 +17,27 @@ app.use(cookieParser());
 const whiteList = [
   "http://localhost:5173",
   "http://127.0.0.1:5173",
-  "app1",
-  "site",
-  "web",
+  "https://task-manager-wdc.vercel.app",
 ];
-app.use(cors({ origin: whiteList, credentials: true }));
+
+app.use(
+  cors({
+    origin: whiteList,
+    credentials: true,
+  })
+);
 
 app.use(routes);
 
-app.use(AppErrors);
+app.use(pageNotFound);
+app.use(appErrors);
 
 app.listen(PORT, () => {
-  console.log(`server is running on port ${PORT}...`);
+  console.log(`Server is running on PORT ${PORT}`);
 });
 
 sqliteConnection()
-  .then(() => {
-    console.log("Database is connected!");
-  })
-  .catch((error) => {
-    console.log("Database ERROR - ", error);
-  });
+  .then(() => console.log("Database is connected..."))
+  .catch((error) => console.error("Database ERROR - ", error));
 
-runMigrations()
-  .then(() => {
-    console.log("Migrations is connected!");
-  })
-  .catch((error) => {
-    console.log("Migrations ERROR - ", error);
-  });
-
-app.get("/test", (req, res) => {
-  res.status(200).json({ message: "Hello World!" });
-});
+runMigrations(); // colocar feedback

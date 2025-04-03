@@ -1,4 +1,4 @@
-import { NextFunction, Request, Response } from "express";
+import { Request, Response, NextFunction } from "express";
 import { userRepository } from "../repositories/userRepository";
 import { authSchema } from "../validations/authSchema";
 import { authServices } from "../services/authServices";
@@ -7,32 +7,30 @@ export const authControllers = {
   async login(req: Request, res: Response, next: NextFunction) {
     try {
       const { email, password } = authSchema.parse(req.body);
-      const { id, token } = await authServices.login(
-        { email, password },
-        userRepository
-      );
 
-      res.cookie("token", token, {
+      const { token, id } = await authServices.login({ email, password }, userRepository);
+
+      res.cookie(process.env.KEY_TOKEN, token, {
         httpOnly: true,
         sameSite: "none",
         secure: true,
-        maxAge: 1000 * 60 * 60 * 24, // 1d
+        maxAge: 1000 * 60 * 60 * 24, // 24h
       });
 
-      res.status(200).json({ message: "Login completed", id });
+      return res.status(200).json({ message: "login completed successfully!", id });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   },
 
-  async logout(req: Request, res: Response, next: NextFunction) {
+  async logout(_req: Request, res: Response, next: NextFunction) {
     try {
-      res
-        .clearCookie("token")
+      return res
+        .clearCookie(process.env.KEY_TOKEN)
         .status(200)
-        .json({ message: "Logout completed" });
+        .json({ message: "logout completed successfully!" });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   },
 };

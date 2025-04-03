@@ -1,30 +1,32 @@
-import { NextFunction, Request, Response } from "express";
-import { UUIDSchema } from "../validations/UUIDSchema";
-import { taskSchema } from "../validations/taskSchema";
-import { taskRepository } from "../repositories/taskRepository";
+import { Request, NextFunction, Response } from "express";
 import { taskServices } from "../services/taskServices";
-import { paginationSchema } from "../validations/PaginationSchema";
+import { taskRepository } from "../repositories/taskRepository";
+import { taskSchema } from "../validations/taskSchema";
+import { UUIDSchema } from "../validations/UUIDSchema";
+import { paginationSchema } from "../validations/paginationSchema";
 
 export const taskControllers = {
   async create(req: Request, res: Response, next: NextFunction) {
     try {
       const { title, description, date, status } = taskSchema.parse(req.body);
-      const { id } = UUIDSchema().parse({ id: req.userID });
+      const { id } = UUIDSchema("user").parse({ id: req.userID });
+
       const taskCreated = await taskServices.create(
         { title, description, date, status, user_id: id },
         taskRepository
       );
-      res
-        .status(201)
-        .json({ messege: "Task created successfully", taskCreated });
+
+      return res.status(201).json({ message: "task created!", taskCreated });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   },
+
   async read(req: Request, res: Response, next: NextFunction) {
     try {
       const { limit, offset, filter } = paginationSchema.parse(req.query);
-      const { id } = UUIDSchema().parse({ id: req.userID });
+      const { id } = UUIDSchema("user").parse({ id: req.userID });
+
       const userTasks = await taskServices.read(
         {
           userID: id,
@@ -34,47 +36,43 @@ export const taskControllers = {
         },
         taskRepository
       );
-      res.status(200).json(userTasks);
+
+      return res.status(200).json({ userTasks });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   },
+
   async update(req: Request, res: Response, next: NextFunction) {
     try {
+      const { id } = UUIDSchema("task").parse(req.params);
+      const userID = UUIDSchema("user").parse({ id: req.userID });
       const { title, description, date, status } = taskSchema.parse(req.body);
-      const { id } = UUIDSchema().parse(req.params);
-      const userID = UUIDSchema().parse({ id: req.userID });
+
       if (status) {
         const taskUpdated = await taskServices.update(
           id,
           { title, description, date, status, user_id: userID.id },
           taskRepository
         );
-        res
-          .status(201)
-          .json({ messege: "Task updated successfully", taskUpdated });
+
+        return res.status(200).json({ message: "task updated!", taskUpdated });
       }
     } catch (error) {
-      next(error);
+      return next(error);
     }
   },
 
   async delete(req: Request, res: Response, next: NextFunction) {
     try {
-      const { id } = UUIDSchema().parse(req.params);
-      const userID = UUIDSchema().parse({ id: req.userID });
+      const { id } = UUIDSchema("task").parse(req.params);
+      const userID = UUIDSchema("user").parse({ id: req.userID });
 
-      const taskDeleted = await taskServices.delete(
-        id,
-        userID.id,
-        taskRepository
-      );
+      const taskDeleted = await taskServices.delete(id, userID.id, taskRepository);
 
-      res
-        .status(200)
-        .json({ message: "Task deleted successfully", taskDeleted });
+      return res.status(200).json({ message: "task was deleted!", taskDeleted });
     } catch (error) {
-      next(error);
+      return next(error);
     }
   },
 };
