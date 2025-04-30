@@ -70,5 +70,5 @@ KEY_TOKEN=""
 
 ## Links
 
-- [Deploy](https://task-manager-api-9om1.onrender.com)
+- [Deploy](https://task-manager-api-zs6u.onrender.com)
 - [Front Repository](https://github.com/EmanuelQuintino/Task-Manager-WDC/)
